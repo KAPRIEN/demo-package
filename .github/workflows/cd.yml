@@ -1,6 +1,7 @@
 name: CD
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - v*
@@ -61,6 +62,47 @@ jobs:
         with:
           name: build-artifacts
           path: dist
+
+      - name: Set artifacts information
+        run: |
+           echo "WHL_NAME=$(ls dist/*whl | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
+           echo "TAR_NAME=$(ls dist/*tar.gz | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
+           echo "WHL_B2SUM=$(b2sum -l 256 dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "TAR_B2SUM=$(b2sum -l 256 dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "WHL_LENGTH=$(du -b dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "TAR_LENGTH=$(du -b dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
+
+      - name: Add to TUF Metadata Repository (KAPRIEN)
+        id: kaprien
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'http://172.105.77.212/api/v1/targets/'
+          method: 'POST'
+          escapeData: 'true'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.KAPRIEN_TOKEN }}"}'
+          data: >-
+            {
+              "targets": [
+                {
+                  "info": {
+                    "length": ${{ env.WHL_LENGTH }},
+                    "hashes": {"blake2b-256": "${{ env.WHL_B2SUM }}"}
+                  },
+                  "path": "demo-target/releases/download/${{ github.ref_name }}/${{ env.WHL_NAME }}"
+                },
+                {
+                  "info": {
+                    "length": ${{ env.TAR_LENGTH }},
+                    "hashes": {"blake2b-256": "${{ env.TAR_B2SUM }}"}
+                },
+                  "path": "demo-target/releases/download/${{ github.ref_name }}/${{ env.TAR_NAME }}"
+                }
+              ]
+            }
+
+      - name: Log Response
+        run: |
+          echo ${{ steps.kaprien.outputs.response }}
 
       - name: Finalize GitHub release
         uses: actions/github-script@c713e510dbd7d213d92d41b7a7805a986f4c5c66
