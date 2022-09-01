@@ -88,14 +88,14 @@ jobs:
                     "length": ${{ env.WHL_LENGTH }},
                     "hashes": {"blake2b-256": "${{ env.WHL_B2SUM }}"}
                   },
-                  "path": "${{ github.ref }}/${{ env.WHL_NAME }}"
+                  "path": "${{ github.ref_name }}/${{ env.WHL_NAME }}"
                 },
                 {
                   "info": {
                     "length": ${{ env.TAR_LENGTH }},
                     "hashes": {"blake2b-256": "${{ env.TAR_B2SUM }}"}
                 },
-                  "path": "${{ github.ref }}/${{ env.TAR_NAME }}"
+                  "path": "${{ github.ref_name }}/${{ env.TAR_NAME }}"
                 }
               ]
             }
