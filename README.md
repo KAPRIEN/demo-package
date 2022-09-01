@@ -1,4 +1,4 @@
-# demo-target
+# demo-package
 
 Demo/test target package
 
