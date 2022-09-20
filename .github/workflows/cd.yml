@@ -76,10 +76,10 @@ jobs:
         id: kaprien
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'http://172.105.77.212/api/v1/targets/'
+          url: 'https://api.demo.kaprien.com/api/v1/targets/'
           method: 'POST'
           escapeData: 'true'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.KAPRIEN_TOKEN }}"}'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.KAPRIEN_API_TARGETS }}"}'
           data: >-
             {
               "targets": [
