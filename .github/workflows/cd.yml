@@ -39,7 +39,7 @@ jobs:
         with:
           name: ${{ github.ref_name }}-rc
           tag_name: ${{ github.ref }}
-          body: "Release waiting for review..."
+          body: "demo-package version ${{ github.ref_name }}"
           files: dist/*
 
       - name: Store build artifacts
@@ -72,14 +72,14 @@ jobs:
            echo "WHL_LENGTH=$(du -b dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
            echo "TAR_LENGTH=$(du -b dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
 
-      - name: Add to TUF Metadata Repository (KAPRIEN)
-        id: kaprien
+      - name: Add to TUF Metadata Repository (RSTUF)
+        id: rstuf
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.demo.kaprien.com/api/v1/targets/'
+          url: 'https://api.rstuf.kairo.dev/api/v1/targets/'
           method: 'POST'
           escapeData: 'true'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.KAPRIEN_API_TARGETS }}"}'
+          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.RSTUF_TARGETS_TOKEN }}"}'
           data: >-
             {
               "targets": [
@@ -102,7 +102,7 @@ jobs:
 
       - name: Log Response
         run: |
-          echo ${{ steps.kaprien.outputs.response }}
+          echo ${{ steps.rstuf.outputs.response }}
 
       - name: Finalize GitHub release
         uses: actions/github-script@c713e510dbd7d213d92d41b7a7805a986f4c5c66
