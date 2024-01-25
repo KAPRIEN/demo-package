@@ -67,8 +67,8 @@ jobs:
         run: |
            echo "WHL_NAME=$(ls dist/*whl | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
            echo "TAR_NAME=$(ls dist/*tar.gz | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
-           echo "WHL_B2SUM=$(b2sum -l 256 dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
-           echo "TAR_B2SUM=$(b2sum -l 256 dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "WHL_B2SUM=$(shasum -a 256 dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "TAR_B2SUM=$(shasum -a 256 dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
            echo "WHL_LENGTH=$(du -b dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
            echo "TAR_LENGTH=$(du -b dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
 
