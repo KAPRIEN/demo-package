@@ -76,10 +76,10 @@ jobs:
         id: rstuf
         uses: fjogeleit/http-request-action@v1
         with:
-          url: 'https://api.rstuf.kairo.dev/api/v1/targets/'
+          url: 'https://api.rstuf.kairo.dev/api/v1/artifacts/'
           method: 'POST'
           escapeData: 'true'
-          customHeaders: '{"Content-Type": "application/json", "Authorization": "Bearer ${{ secrets.RSTUF_TARGETS_TOKEN }}"}'
+          customHeaders: '{"apikey": "${{ secrets.RSTUF_TARGETS_TOKEN }}"}'
           data: >-
             {
               "targets": [
