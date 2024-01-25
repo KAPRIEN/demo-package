@@ -67,8 +67,8 @@ jobs:
         run: |
            echo "WHL_NAME=$(ls dist/*whl | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
            echo "TAR_NAME=$(ls dist/*tar.gz | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
-           echo "WHL_B2SUM=$(shasum -a 256 dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
-           echo "TAR_B2SUM=$(shasum -a 256 dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "WHL_SHASUM=$(shasum -a 256 dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "TAR_SHASUM=$(shasum -a 256 dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
            echo "WHL_LENGTH=$(du -b dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
            echo "TAR_LENGTH=$(du -b dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
 
@@ -86,14 +86,14 @@ jobs:
                 {
                   "info": {
                     "length": ${{ env.WHL_LENGTH }},
-                    "hashes": {"blake2b-256": "${{ env.WHL_B2SUM }}"}
+                    "hashes": {"sha256": "${{ env.WHL_SHASUM }}"}
                   },
                   "path": "${{ github.ref_name }}/${{ env.WHL_NAME }}"
                 },
                 {
                   "info": {
                     "length": ${{ env.TAR_LENGTH }},
-                    "hashes": {"blake2b-256": "${{ env.TAR_B2SUM }}"}
+                    "hashes": {"sha256": "${{ env.TAR_SHASUM }}"}
                 },
                   "path": "${{ github.ref_name }}/${{ env.TAR_NAME }}"
                 }
