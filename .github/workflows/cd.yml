@@ -7,10 +7,10 @@ on:
       - v*
 
 permissions:
-  contents: write
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -27,11 +27,15 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install build dependency
-        run: python3 -m pip install --upgrade pip build
-
-      - name: Build binary wheel and source tarball
-        run: python3 -m build --sdist --wheel --outdir dist/ .
+      - name: Witness Run
+        uses: testifysec/witness-run-action@v0.1
+        with:
+          step: build
+          enable-archivista: false
+          enable-sigstore: false
+          command: |
+            python3 -m pip install --upgrade pip build
+            python3 -m build --sdist --wheel --outdir dist/ .
 
       - id: gh-release
         name: Publish GitHub release candiate
@@ -42,13 +46,13 @@ jobs:
           body: "demo-package version ${{ github.ref_name }}"
           files: dist/*
 
-      - name: Store build artifacts
+      - name: Store built artifacts
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         # NOTE: The GitHub release page contains the release artifacts too, but using
         # GitHub upload/download actions seems robuster: there is no need to compute
         # download URLs and tampering with artifacts between jobs is more limited.
         with:
-          name: build-artifacts
+          name: built-artifacts
           path: dist
 
   release:
@@ -60,7 +64,7 @@ jobs:
       - name: Fetch build artifacts
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741
         with:
-          name: build-artifacts
+          name: built-artifacts
           path: dist
 
       - name: Set artifacts information
