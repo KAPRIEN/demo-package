@@ -28,11 +28,9 @@ jobs:
           python-version: '3.x'
 
       - name: Witness Run
-        uses: testifysec/witness-run-action@v0.1
+        uses: testifysec/witness-run-action@40aa4ef36fc431a37de7c3faebcb66513c03b934
         with:
           step: build
-          enable-archivista: false
-          enable-sigstore: false
           command: /bin/sh -c make build
 
       - id: gh-release
