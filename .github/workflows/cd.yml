@@ -30,17 +30,18 @@ jobs:
       - name: Witness Run
         uses: testifysec/witness-run-action@40aa4ef36fc431a37de7c3faebcb66513c03b934
         with:
+          enable-archivista: false
           step: build
           command: /bin/sh -c make build
 
-      - name: Store built artifacts
+      - name: Store build artifacts
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         # NOTE: The GitHub release page contains the release artifacts too, but using
         # GitHub upload/download actions seems robuster: there is no need to compute
         # download URLs and tampering with artifacts between jobs is more limited.
         with:
-          name: built-artifacts
-          path: dist
+          name: build-artifacts
+          path: dist /tmp/build-attestation.json
 
   candidate_release:
     name: Release candidate on Github for review
@@ -51,11 +52,11 @@ jobs:
     outputs:
       release_id: ${{ steps.gh-release.outputs.result }}
     steps:
-      - name: Fetch built artifacts
+      - name: Fetch build artifacts
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
-          name: built-artifacts
-          path: dist
+          name: build-artifacts
+          path: dist /tmp/build-attestation.json
 
       - id: gh-release
         name: Publish GitHub release draft
@@ -92,8 +93,8 @@ jobs:
       - name: Fetch build artifacts
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741
         with:
-          name: built-artifacts
-          path: dist
+          name: build-artifacts
+          path: dist /tmp/build-attestation.json
 
       - name: Set artifacts information
         run: |
