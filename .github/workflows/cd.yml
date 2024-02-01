@@ -33,7 +33,7 @@ jobs:
           step: build
           enable-archivista: false
           enable-sigstore: false
-          command: make build
+          command: /bin/sh -c make build
 
       - id: gh-release
         name: Publish GitHub release candiate
