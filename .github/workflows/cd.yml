@@ -56,7 +56,7 @@ jobs:
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: build-artifacts
-          path: dist /tmp/build-attestation.json
+          path: dist /tmp
 
       - id: gh-release
         name: Publish GitHub release draft
@@ -81,11 +81,20 @@ jobs:
                 data: fs.readFileSync('dist/' + file),
               });
             });
+            fs.readdirSync('/tmp/').forEach(file => {
+              github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: res.data.id,
+                name: file,
+                data: fs.readFileSync('/tmp/' + file),
+              });
+            });
             return res.data.id
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: build
+    needs: candidate_release
     environment: release
     permissions:
       contents: write # to modify GitHub releases
@@ -94,7 +103,7 @@ jobs:
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741
         with:
           name: build-artifacts
-          path: dist /tmp/build-attestation.json
+          path: dist /tmp
 
       - name: Set artifacts information
         run: |
