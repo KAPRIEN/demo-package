@@ -34,14 +34,16 @@ jobs:
           step: build
           command: /bin/sh -c make build
 
+      - name: Copy Attestation
+        run: |
+          ls -la /tmp
+          cp /tmp/build-attestation.json dist/
+
       - name: Store build artifacts
         uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6
-        # NOTE: The GitHub release page contains the release artifacts too, but using
-        # GitHub upload/download actions seems robuster: there is no need to compute
-        # download URLs and tampering with artifacts between jobs is more limited.
         with:
           name: build-artifacts
-          path: dist /tmp/build-attestation.json
+          path: dist/
 
   candidate_release:
     name: Release candidate on Github for review
@@ -56,7 +58,7 @@ jobs:
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: build-artifacts
-          path: dist /tmp
+          path: dist/
 
       - id: gh-release
         name: Publish GitHub release draft
@@ -81,15 +83,6 @@ jobs:
                 data: fs.readFileSync('dist/' + file),
               });
             });
-            fs.readdirSync('/tmp/').forEach(file => {
-              github.rest.repos.uploadReleaseAsset({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: res.data.id,
-                name: file,
-                data: fs.readFileSync('/tmp/' + file),
-              });
-            });
             return res.data.id
   release:
     name: Release
@@ -103,16 +96,19 @@ jobs:
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
         with:
           name: build-artifacts
-          path: dist /tmp
+          path: dist/
 
       - name: Set artifacts information
         run: |
-           echo "WHL_NAME=$(ls dist/*whl | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
-           echo "TAR_NAME=$(ls dist/*tar.gz | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
-           echo "WHL_SHASUM=$(shasum -a 256 dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "WHL_NAME=$(ls dist/*.whl | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
+           echo "TAR_NAME=$(ls dist/*.tar.gz | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
+           echo "ATT_NAME=$(ls dist/*.json | awk -F '/' '{ print $NF }')" >> $GITHUB_ENV
+           echo "WHL_SHASUM=$(shasum -a 256 dist/*.whl | awk '{ print $1 }')" >> $GITHUB_ENV
            echo "TAR_SHASUM=$(shasum -a 256 dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
-           echo "WHL_LENGTH=$(du -b dist/*whl | awk '{ print $1 }')" >> $GITHUB_ENV
-           echo "TAR_LENGTH=$(du -b dist/*tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "ATT_SHASUM=$(shasum -a 256 dist/*.json | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "WHL_LENGTH=$(du -b dist/*.whl | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "TAR_LENGTH=$(du -b dist/*.tar.gz | awk '{ print $1 }')" >> $GITHUB_ENV
+           echo "ATT_LENGTH=$(du -b dist/*.json | awk '{ print $1 }')" >> $GITHUB_ENV
 
       - name: Add to TUF Metadata Repository (RSTUF)
         id: rstuf
@@ -138,6 +134,13 @@ jobs:
                     "hashes": {"sha256": "${{ env.TAR_SHASUM }}"}
                 },
                   "path": "${{ github.ref_name }}/${{ env.TAR_NAME }}"
+                },
+                {
+                  "info": {
+                    "length": ${{ env.ATT_LENGTH }},
+                    "hashes": {"sha256": "${{ env.ATT_SHASUM }}"}
+                },
+                  "path": "${{ github.ref_name }}/${{ env.ATT_NAME }}"
                 }
               ]
             }
@@ -153,6 +156,6 @@ jobs:
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id: '${{ needs.build.outputs.release_id }}',
+              release_id: '${{ needs.candidate_release.outputs.release_id }}',
               name: '${{ github.ref_name }}',
             })
