@@ -32,7 +32,7 @@ jobs:
         with:
           enable-archivista: false
           step: build
-          command: /bin/sh -c make build
+          command: 	python3 -m pip install --upgrade pip build && python3 -m build --sdist --wheel --outdir dist/ .
 
       - name: Copy Attestation
         run: |
