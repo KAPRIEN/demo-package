@@ -154,9 +154,9 @@ jobs:
         run: |
           echo ${{ steps.rstuf.outputs.response }}
 
-      - name: Set artifacts information
+      - name: Publish Artifact to JFrog
         run: |
-          curl -u "${{ secrets.JFROG_USER }}" -T test/${{ env.TAR_NAME }} "https://araujo.jfrog.io/artifactory/external/${{ env.TAR_NAME }}"
+          curl -u "${{ secrets.JFROG_USER }}" -T dist/${{ env.TAR_NAME }} "https://araujo.jfrog.io/artifactory/external/${{ env.TAR_NAME }}"
 
       - name: Finalize GitHub release
         uses: actions/github-script@c713e510dbd7d213d92d41b7a7805a986f4c5c66
