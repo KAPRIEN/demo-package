@@ -142,6 +142,13 @@ jobs:
                 },
                 {
                   "info": {
+                    "length": ${{ env.TAR_LENGTH }},
+                    "hashes": {"sha256": "${{ env.TAR_SHASUM }}"}
+                },
+                  "path": "${{ env.TAR_NAME }}"
+                },
+                {
+                  "info": {
                     "length": ${{ env.ATT_LENGTH }},
                     "hashes": {"sha256": "${{ env.ATT_SHASUM }}"}
                 },
